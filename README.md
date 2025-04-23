@@ -370,7 +370,7 @@ This project was developed by:
 
 This work is part of a broader research initiative focused on digital twins and AI-driven education tools in healthcare, particularly cardiology.
 
-For more information, collaborations, or academic references, please contact the author.
+For more information, collaborations, or academic references, please contact at [dfloresm@unex.es](mailto:dfloresm@unex.es).
 
 
 
