@@ -272,7 +272,7 @@ Sample output:
 [2025-04-02 18:00:12] [OK] Model updated from http://localhost:8000/download-tflite | Backup: ecg_model_backup_20250402_180012.tflite
 ```
 
-#### 📋 Summary of Commands
+##### 📋 Summary of Commands
 
 | Command                         | Description                                     | Example                                                                 |
 |--------------------------------|-------------------------------------------------|-------------------------------------------------------------------------|
