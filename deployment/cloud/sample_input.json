@@ -1,0 +1,10 @@
+{
+  "Heart_Rate": 75,
+  "PR_Interval": 160,
+  "QRS_Duration": 90,
+  "ST_Segment": 0.1,
+  "QTc_Interval": 420,
+  "Electrical_Axis": 5,
+  "Rhythm": "Sinus",
+  "T_Wave": "Normal"
+}
