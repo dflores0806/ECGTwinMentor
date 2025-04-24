@@ -53,17 +53,25 @@ The project is organized into the following main directories:
 
 ```
 ECGTwinMentor/
-├── cloud/                    → Web-based deployment (React + FastAPI)
-│   ├── frontend/             → React frontend application
-│   └── backend/              → FastAPI backend API with ML model
-├── edge/                     → Edge deployments for offline use
-│   ├── android/              → Android app (Kotlin + TensorFlow Lite)
-│   └── raspberry/            → Raspberry Pi script for local inference
-├── model/                    → Trained model files and conversion tools
-│   ├── ecg_model.h5          → Original Keras model
-│   └── ecg_model.tflite      → Converted TFLite model
-├── images/                   → Diagrams and illustrations
-└── README.md                 → Project documentation
+├── cloud/                        → Web-based deployment (React + FastAPI)
+│   ├── frontend/                 → React frontend application
+│   └── backend/                  → FastAPI backend API with ML model
+├── edge/                         → Edge deployments for offline use
+│   ├── android/                  → Android app (Kotlin + TensorFlow Lite)
+│   └── raspberry/                → Raspberry Pi script for local inference
+├── model/                        → Trained model files and conversion tools
+│   ├── ecg_model.h5              → Original Keras model
+│   ├── ecg_model.tflite          → Converted TFLite model
+│   └── ecg_model.onnx            → Converted ONNX model
+├── model/                        → Local training + validation script and assets
+│   ├── ecgtwinmentor_colab.py    → Full training/export/validation workflow
+│   ├── ecg_dataset.csv           → ECG dataset used in training
+│   └── requirements.txt          → Python dependencies for local execution
+├── images/                       → Diagrams and illustrations
+│   ├── architecture_diagram.png  → System architecture
+│   └── training_summary.pdf      → Evaluation and result charts (optional)
+└── README.md                     → Project documentation and instructions
+
 ```
 
 Each module is self-contained and can be independently tested or deployed depending on the target platform.
