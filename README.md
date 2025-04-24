@@ -22,6 +22,22 @@ Version 1.0.0 consolidates the architecture, machine learning model, and multipl
 
 ---
 
+## 🚀 Features
+
+ECGTwinMentor offers a comprehensive set of features designed for ECG education, simulation, and AI-powered prediction:
+
+- **Digital Twin Architecture**: Replicates a real ECG environment in a digital, interactive form.
+- **Deep Learning-Based Prediction**: A trained model classifies heart conditions based on standard ECG parameters.
+- **ECG Simulation**: Generates synthetic ECG signals from custom user input to support learning and interpretation.
+- **Multi-Platform Support**: The system runs on web (cloud) and edge (Android, Raspberry Pi) environments.
+- **Model Conversion and Deployment**: Includes scripts and tools to convert and deploy the trained model as TensorFlow Lite for edge devices.
+- **Student Self-Assessment**: Allows users to select their own diagnosis and compare it with the system’s prediction.
+- **Offline Inference**: Edge deployments enable use without internet connection.
+- **Model Update Mechanism**: Supports remote downloading and replacement of the model in both Android and Raspberry Pi setups.
+
+
+---
+
 ## 🧩 Architecture
 
 The following diagram illustrates the overall architecture of the ECGTwinMentor system, covering both cloud and edge deployments:
@@ -75,21 +91,6 @@ ECGTwinMentor/
 ```
 
 Each module is self-contained and can be independently tested or deployed depending on the target platform.
-
----
-
-## 🚀 Features
-
-ECGTwinMentor offers a comprehensive set of features designed for ECG education, simulation, and AI-powered prediction:
-
-- **Digital Twin Architecture**: Replicates a real ECG environment in a digital, interactive form.
-- **Deep Learning-Based Prediction**: A trained model classifies heart conditions based on standard ECG parameters.
-- **ECG Simulation**: Generates synthetic ECG signals from custom user input to support learning and interpretation.
-- **Multi-Platform Support**: The system runs on web (cloud) and edge (Android, Raspberry Pi) environments.
-- **Model Conversion and Deployment**: Includes scripts and tools to convert and deploy the trained model as TensorFlow Lite for edge devices.
-- **Student Self-Assessment**: Allows users to select their own diagnosis and compare it with the system’s prediction.
-- **Offline Inference**: Edge deployments enable use without internet connection.
-- **Model Update Mechanism**: Supports remote downloading and replacement of the model in both Android and Raspberry Pi setups.
 
 ---
 
