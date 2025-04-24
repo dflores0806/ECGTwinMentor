@@ -104,6 +104,53 @@ These parameters are used both for simulating realistic ECG signals and for feed
 
 ---
 
+## 🤖 Deep Learning Model
+
+The model is defined as a fully connected neural network with the following structure:
+- Input layer: accepts 8 standardized ECG parameters
+- Hidden layers:
+  - Dense(128) with ReLU activation
+  - Dense(64) with ReLU activation
+  - Dense(32) with ReLU activation
+- Output layer: Dense layer with softmax activation corresponding to the number of diagnostic classes
+
+During training:
+- The model is compiled with the `Adam` optimizer and `sparse_categorical_crossentropy` as loss function.
+- Early stopping is applied to avoid overfitting based on validation loss.
+- The training set is balanced using **SMOTE** to correct class imbalances.
+- Training and validation loss and accuracy are plotted and saved.
+- A confusion matrix, classification report, Mean Absolute Error (MAE), and R² score are computed.
+
+### 📤 Export
+
+After training, the model is exported to:
+- `.h5` format using `model.save(...)`
+- `.tflite` using TensorFlow Lite Converter
+- `.onnx` using `tf2onnx.convert.from_function(...)` *(note: ONNX export may require local conversion if compatibility issues arise)*
+
+### 🔍 Sample Prediction
+
+A random test sample is selected and passed through the model to:
+- Display the predicted and actual class
+- Show class probabilities (softmax)
+- Indicate prediction confidence
+
+### 🧪 How to Run the Python Script (`.py` version)
+
+To execute the training and export process from the `.py` file instead of Colab:
+
+```bash
+python -m venv ecg_env
+# Activate on Windows:
+ecg_env\Scripts\activate
+# Activate on macOS/Linux:
+source ecg_env/bin/activate
+pip install -r requirements.txt
+python ecgtwinmentor_colab.py
+```
+
+---
+
 ## 🛠️ Deployment Options
 
 ECGTwinMentor has been designed to support flexible deployment across multiple environments, enabling both online (cloud) and offline (edge) usage. This multiplatform capability allows the system to adapt to various educational and technical contexts.
