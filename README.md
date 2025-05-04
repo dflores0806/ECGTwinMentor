@@ -70,23 +70,18 @@ The project is organized into the following main directories:
 
 ```
 ECGTwinMentor/
-├── cloud/                        → Web-based deployment (React + FastAPI)
-│   ├── frontend/                 → React frontend application
-│   └── backend/                  → FastAPI backend API with ML model
-├── edge/                         → Edge deployments for offline use
-│   ├── android/                  → Android app (Kotlin + TensorFlow Lite)
-│   └── raspberry/                → Raspberry Pi script for local inference
-├── model/                        → Trained model files and conversion tools
-│   ├── ecg_model.h5              → Original Keras model
-│   ├── ecg_model.tflite          → Converted TFLite model
-│   └── ecg_model.onnx            → Converted ONNX model
+├── deployment/                   → Deployment possibilities for ECGTwinMentor
+│   ├── cloud                     → Web-based deployment (React + FastAPI)
+│   │    ├── frontend/            → React frontend application
+│   │    └── backend/             → FastAPI backend API with ML model
+│   └── edge/                     → Edge deployments for offline use
+│        ├── android/             → Android app (Kotlin + TensorFlow Lite)
+│        └── raspberry/           → Raspberry Pi script for local inference
 ├── model/                        → Local training + validation script and assets
-│   ├── ecgtwinmentor_colab.py    → Full training/export/validation workflow
 │   ├── ecg_dataset.csv           → ECG dataset used in training
+│   ├── ecgtwinmentor_colab.py    → Full training/export/validation workflow
 │   └── requirements.txt          → Python dependencies for local execution
-├── images/                       → Diagrams and illustrations
-│   ├── architecture_diagram.png  → System architecture
-│   └── training_summary.pdf      → Evaluation and result charts (optional)
+├── images/                       → Repository diagrams and illustrations
 └── README.md                     → Project documentation and instructions
 
 ```
@@ -196,8 +191,6 @@ The frontend is developed using **React**, providing an interactive web interfac
 - Trigger predictions using the backend AI model
 - Visualize ECG waveform simulations
 - Compare user-selected diagnoses with model output
-
-![Web-cloud deployment](/images/ECG_Web.png)
 
 It communicates with the backend via **REST API** and is designed to be lightweight, responsive, and intuitive for educational use.
 
