@@ -6,13 +6,21 @@ import json
 import matplotlib
 import matplotlib.pyplot as plt
 import joblib
+import pandas as pd
+import random
+from pathlib import Path
+from datetime import datetime
+from collections import defaultdict, Counter
+from dotenv import load_dotenv
+from io import StringIO
+import csv
 
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi import BackgroundTasks
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -31,7 +39,23 @@ app.add_middleware(
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"]
 )
+
+# Load users
+ENV_PATH = Path(".env")
+if not ENV_PATH.exists():
+    with open(ENV_PATH, "w") as f:
+        f.write("USERS_JSON={'admin': {'password': 'admin123', 'role': 'admin'}, 'demo': {'password': 'demo', 'role': 'user'}}")
+load_dotenv()
+
+USERS_JSON = os.getenv("USERS_JSON")
+USERS = json.loads(USERS_JSON)
+
+# Logs
+os.makedirs("logs", exist_ok=True)
+STATISTICS_PATH = Path("logs/statistics.jsonl")
+
 # Model settings
 TFLITE_PATH = "ecg_model.tflite"
 KERAS_MODEL_PATH = "ecg_model.h5"
@@ -49,6 +73,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Load model and scaler
 model = tf.keras.models.load_model("ecg_model.h5")
 scaler = joblib.load("scaler.pkl")
+df = pd.read_csv("ecg_dataset.csv")
 
 class EncryptedRequest(BaseModel):
     data: str  # base64 encoded encrypted data
@@ -84,6 +109,7 @@ class ECGInput(BaseModel):
     Electrical_Axis: float
     Rhythm: str
     T_Wave: str
+    user_diagnosis: str
 
 def generate_ecg_image(data, cycles: int = 3) -> str:
     fs = 1000
@@ -135,93 +161,37 @@ def generate_ecg_image(data, cycles: int = 3) -> str:
     plt.close()
     return filepath
 
-
-def generate_ecg_image_to_buffer(data, buffer, cycles: int = 3):
-    fs = 1000
-    cycle_duration = 60 / float(data['Heart_Rate'])
-    samples_per_cycle = int(fs * cycle_duration)
-    t = np.linspace(0, cycle_duration, samples_per_cycle)
-
-    def safe(arr, idx):
-        return arr[min(max(0, idx), len(arr) - 1)]
-
-    def synthetic_ecg(t, pr, qrs, qt, st, rhythm, t_wave_type, axis_deg):
-        pr = float(pr)
-        qrs = float(qrs)
-        qt = float(qt)
-        st = float(st)
-
-        ecg = np.zeros_like(t)
-        p_start = int(0.1 * fs)
-        p_peak = p_start + int(0.04 * fs)
-        qrs_start = p_start + int(pr / 1000 * fs)
-        qrs_peak = qrs_start + int(qrs / 2000 * fs)
-        t_peak = qrs_start + int(qt / 1000 * fs)
-
-        # Escalado por tipo de ritmo
-        if rhythm == 'Tachycardia':
-            rhythm_amp = 0.9
-        elif rhythm == 'Bradycardia':
-            rhythm_amp = 1.2
-        else:
-            rhythm_amp = 1.0
-
-        # Amplitud de onda T según tipo
-        t_wave_amp = 0.3
-        if t_wave_type == 'Inverted':
-            t_wave_amp *= -1
-        elif t_wave_type == 'Flat':
-            t_wave_amp = 0.1
-
-        # Offset por eje eléctrico
-        axis_offset = np.sin(np.radians(float(axis_deg))) * 0.2
-
-
-        ecg += np.exp(-((t - safe(t, p_peak)) ** 2) / (2 * (0.015 ** 2))) * 0.1
-        ecg += -np.exp(-((t - safe(t, qrs_peak - 5)) ** 2) / (2 * (0.004 ** 2))) * 0.15
-        ecg += np.exp(-((t - safe(t, qrs_peak)) ** 2) / (2 * (0.01 ** 2))) * 1.0
-        ecg += -np.exp(-((t - safe(t, qrs_peak + 5)) ** 2) / (2 * (0.004 ** 2))) * 0.2
-        ecg += np.exp(-((t - safe(t, t_peak)) ** 2) / (2 * (0.04 ** 2))) * t_wave_amp
-
-        ecg = ecg * rhythm_amp + axis_offset
-        return ecg
-
-    ecg_wave = synthetic_ecg(
-        t,
-        data['PR_Interval'],
-        data['QRS_Duration'],
-        data['QTc_Interval'],
-        data['ST_Segment'],
-        data['Rhythm'],
-        data['T_Wave'],
-        data['Electrical_Axis']
-    )
-
-    ecg_long = np.tile(ecg_wave, cycles)
-    t_long = np.linspace(0, cycle_duration * cycles, len(ecg_long))
-
-    plt.figure(figsize=(12, 3))
-    plt.plot(t_long, ecg_long, color='orange', linewidth=2)
-    plt.title("Simulated ECG")
-    plt.xlabel("Time (s)")
-    plt.ylabel("Amplitude (a.u.)")
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig(buffer, format='png')
-    plt.close()
-
 #############
 # ENDPOINTS #
 #############
+
+# Login
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+@app.post("/login")
+def login_user(login: LoginRequest):
+    user = USERS.get(login.username)
+    if not user or user["password"] != login.password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    return {
+        "username": login.username,
+        "role": user["role"],
+        "token": f"{login.username}::{login.password}"
+    }
+
 
 # Predict with uer data    
 @app.post("/predict")
 @limiter.limit("100/minute")
 async def secure_predict(request: Request, ecgdata: EncryptedRequest):
     try:
-        # Decrypt data and create ECG object
+        # Decrypt data and create ECG object       
         decrypted_data = decrypt_payload(ecgdata.data)   
         ecg_input = ECGInput(**decrypted_data)    
+        
+        print("ECG=", ecg_input)
         
         x = np.array([[
             ecg_input.Heart_Rate,
@@ -238,6 +208,20 @@ async def secure_predict(request: Request, ecgdata: EncryptedRequest):
         predicted_class = int(np.argmax(prediction))
         label = label_map.get(predicted_class, "Unknown")
         
+        # Save log
+        selected_diagnosis = ecg_input.user_diagnosis
+
+        log_entry = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "input": decrypted_data,
+            "model_prediction": label,
+            "user_diagnosis": selected_diagnosis,
+            "match": label == selected_diagnosis
+        }
+
+        with open(STATISTICS_PATH, "a") as f:
+            f.write(json.dumps(log_entry) + "\n")
+        
         # Return prediction result
         return {"prediction": label}
 
@@ -245,22 +229,32 @@ async def secure_predict(request: Request, ecgdata: EncryptedRequest):
         print("Error=", str(e))
         return {"error": str(e)}
 
-# Generate ECG image
-@app.post("/generate-ecg")
-@limiter.limit("100/minute")
-def generate_ecg(request: Request, ecgdata: EncryptedRequest):
-    img_bytes = io.BytesIO()
-    
-    # Decrypt data and create ECG image
-    data = decrypt_payload(ecgdata.data)
-    generate_ecg_image_to_buffer(data, img_bytes)
-    img_bytes.seek(0)
 
-    # Return ECG image
-    return StreamingResponse(img_bytes, media_type="image/png")
+# Generate pathology sample
+class DiagnosisRequest(BaseModel):
+    diagnosis: str
+    
+@app.post("/samples/random")
+async def get_random_sample(data: DiagnosisRequest):
+    filtered = df[df["Diagnosis"] == data.diagnosis]
+    if filtered.empty:
+        return {"error": "No samples found for that diagnosis"}
+    
+    sample = filtered.sample(1).iloc[0]
+
+    return {
+        "Heart_Rate": sample["Heart_Rate"],
+        "PR_Interval": sample["PR_Interval"],
+        "QRS_Duration": sample["QRS_Duration"],
+        "ST_Segment": sample["ST_Segment"],
+        "QTc_Interval": sample["QTc_Interval"],
+        "Electrical_Axis": sample["Electrical_Axis"],
+        "Rhythm": sample["Rhythm"],
+        "T_Wave": sample["T_Wave"]
+    }
 
 # Download tflite model
-@app.get("/download-tflite")
+@app.get("/models/tflite/download")
 @limiter.limit("50/minute")
 def convert_and_download_model(request: Request):
     # Verifica si el modelo Keras existe
@@ -284,3 +278,97 @@ def convert_and_download_model(request: Request):
         filename="ecg_model.tflite",
         media_type="application/octet-stream"
     )
+
+# Get stats
+@app.get("/stats/summary")
+async def get_prediction_stats():
+    total = 0
+    correct = 0
+    by_diagnosis = Counter()
+    by_date = defaultdict(lambda: {"correct": 0, "incorrect": 0})
+    confusions = Counter()
+
+    if os.path.exists(STATISTICS_PATH):
+        with open(STATISTICS_PATH, "r") as f:
+            for line in f:
+                try:
+                    entry = json.loads(line)
+                    total += 1
+                    if entry.get("match"):
+                        correct += 1
+                    user_diag = entry.get("user_diagnosis", "Unknown")
+                    model_diag = entry.get("model_prediction", "Unknown")
+                    timestamp = entry.get("timestamp")
+                    by_diagnosis[user_diag] += 1
+                    if timestamp:
+                        date = datetime.fromisoformat(timestamp).date().isoformat()
+                        if entry.get("match"):
+                            by_date[date]["correct"] += 1
+                        else:
+                            by_date[date]["incorrect"] += 1
+                    if user_diag != model_diag:
+                        confusions[(user_diag, model_diag)] += 1
+                except:
+                    continue
+
+    return {
+        "total": total,
+        "accuracy": round(correct / total, 4) if total else 0.0,
+        "by_diagnosis": dict(by_diagnosis),
+        "by_date": dict(by_date),
+        "confusions": [{"user": u, "model": m, "count": c} for (u, m), c in confusions.most_common(5)]
+    }
+
+@app.get("/stats/export/csv")
+def export_stats_csv(x_token: str = Header(...)):
+    try:
+        username, password = x_token.split("::")
+        user = USERS.get(username)
+        if not user or user["password"] != password or user["role"] != "admin":
+            raise HTTPException(status_code=403, detail="Forbidden")
+    except:
+        raise HTTPException(status_code=403, detail="Invalid token format")
+    
+    if not os.path.exists(STATISTICS_PATH):
+        raise HTTPException(status_code=404, detail="No statistics found")
+
+    with open(STATISTICS_PATH, "r") as f:
+        data = [json.loads(line) for line in f if line.strip()]
+
+    if not data:
+        raise HTTPException(status_code=204, detail="No data available")
+
+    # Convert to CSV
+    output = StringIO()
+    writer = csv.DictWriter(output, fieldnames=data[0].keys())
+    writer.writeheader()
+    writer.writerows(data)
+
+    # Generate filename with timestamp
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"ECGTM_stats_{timestamp}.csv"
+
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="text/csv",
+        headers={"content-disposition": f"attachment; filename={filename}"}
+    )
+
+@app.delete("/stats")
+async def clear_statistics(x_token: str = Header(...)):
+    try:
+        username, password = x_token.split("::")
+        user = USERS.get(username)
+        if not user or user["password"] != password or user["role"] != "admin":
+            raise HTTPException(status_code=403, detail="Forbidden")
+    except:
+        raise HTTPException(status_code=403, detail="Invalid token format")
+
+    with open(STATISTICS_PATH, "w") as f:
+        try:
+            if os.path.exists(STATISTICS_PATH):
+                open(STATISTICS_PATH, "w").close() 
+            return JSONResponse(content={"message": "Statistics cleared."}, status_code=200)
+        except Exception as e:
+            return JSONResponse(content={"error": str(e)}, status_code=500)

@@ -26,14 +26,15 @@ Version 1.0.0 consolidates the architecture, machine learning model, and multipl
 
 ECGTwinMentor offers a comprehensive set of features designed for ECG education, simulation, and AI-powered prediction:
 
-- **Digital Twin Architecture**: Replicates a real ECG environment in a digital, interactive form.
-- **Deep Learning-Based Prediction**: A trained model classifies heart conditions based on standard ECG parameters.
-- **ECG Simulation**: Generates synthetic ECG signals from custom user input to support learning and interpretation.
-- **Multi-Platform Support**: The system runs on web (cloud) and edge (Android, Raspberry Pi) environments.
-- **Model Conversion and Deployment**: Includes scripts and tools to convert and deploy the trained model as TensorFlow Lite for edge devices.
-- **Student Self-Assessment**: Allows users to select their own diagnosis and compare it with the system’s prediction.
-- **Offline Inference**: Edge deployments enable use without internet connection.
-- **Model Update Mechanism**: Supports remote downloading and replacement of the model in both Android and Raspberry Pi setups.
+- **Digital twin architecture**: Replicates a real ECG environment in a digital, interactive form.
+- **Deep learning-based predictions**: A trained model classifies heart conditions based on standard ECG parameters.
+- **ECG simulation**: Generates synthetic ECG signals from custom user input to support learning and interpretation.
+- **Multi-platform support**: The system runs on web (cloud) and edge (Android, Raspberry Pi) environments.
+- **Model conversion and deployment**: Includes scripts and tools to convert and deploy the trained model as TensorFlow Lite for edge devices.
+- **Student self-assessment**: Allows users to select their own diagnosis and compare it with the system’s prediction.
+- **Offline inference**: Edge deployments enable use without internet connection.
+- **Model update mechanism**: Supports remote downloading and replacement of the model in both Android and Raspberry Pi setups.
+- **Simple web login**: The frontend includes a lightweight login system with two pre-configured users: `admin:admin123` and `demo:demo`. The administrator can clear or export prediction statistics. These credentials can be modified in the backend `.env` file.
 
 
 ---
@@ -196,6 +197,8 @@ The frontend is developed using **React**, providing an interactive web interfac
 - Visualize ECG waveform simulations
 - Compare user-selected diagnoses with model output
 
+![Web-cloud deployment](/images/ECG_Web.png)
+
 It communicates with the backend via **REST API** and is designed to be lightweight, responsive, and intuitive for educational use.
 
 The frontend is located in the `cloud/frontend/` directory and can be run in development mode locally or deployed to a static hosting service such as AWS Amplify, Netlify, or Vercel.
@@ -205,6 +208,15 @@ cd frontend
 npm install
 npm run dev
 ```
+
+Default users login are:
+
+```
+admin:admin123  → Can use ECGTwinMentor, export and delete statistics (role admin)
+demo:demo       → Can use ECGTwinMentor (role user)
+```
+
+This users can be edited in `backend/.env`.
 
 This will start the frontend on http://localhost:3000
 
@@ -427,6 +439,3 @@ This project was developed by:
 This work is part of a broader research initiative focused on digital twins and AI-driven education tools in healthcare, particularly cardiology.
 
 For more information, collaborations, or academic references, please contact at [dfloresm@unex.es](mailto:dfloresm@unex.es).
-
-
-
