@@ -46,7 +46,10 @@ app.add_middleware(
 ENV_PATH = Path(".env")
 if not ENV_PATH.exists():
     with open(ENV_PATH, "w") as f:
-        f.write("USERS_JSON={'admin': {'password': 'admin123', 'role': 'admin'}, 'demo': {'password': 'demo', 'role': 'user'}}")
+        f.write(
+    'USERS_JSON={"admin": {"password": "admin123", "role": "admin"}, '
+    '"demo": {"password": "demo", "role": "user"}}'
+)
 load_dotenv()
 
 USERS_JSON = os.getenv("USERS_JSON")
