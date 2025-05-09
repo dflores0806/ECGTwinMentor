@@ -253,6 +253,7 @@ const ECGPrediction = () => {
                   sx={{ height: 40 }}
                 >
                   <MenuItem value="">Select condition</MenuItem>
+                  <MenuItem value="Normal">Normal</MenuItem>
                   <MenuItem value="Bradycardia">Bradycardia</MenuItem>
                   <MenuItem value="Tachycardia">Tachycardia</MenuItem>
                   <MenuItem value="Atrial Fibrillation">Atrial Fibrillation</MenuItem>
