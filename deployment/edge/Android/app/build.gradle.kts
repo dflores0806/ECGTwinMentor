@@ -49,9 +49,14 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
     implementation("org.tensorflow:tensorflow-lite:2.13.0")
     implementation("androidx.appcompat:appcompat:1.4.0")
-    implementation ("com.google.android.material:material:1.5.0")
+    implementation("androidx.compose.material3:material3-window-size-class:1.1.2")
+    implementation("androidx.compose.ui:ui-text:1.5.4")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+
+
     implementation(libs.androidx.navigation.ui.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

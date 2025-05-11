@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => {
   const PORT = 3000;
 
   return {
+    base: '/demo/',
     server: {
       // this ensures that the browser opens upon server start
       open: true,
@@ -44,7 +45,6 @@ export default defineConfig(({ mode }) => {
         '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs'
       }
     },
-    base: env.VITE_APP_BASE_NAME || '/demo/',
     plugins: [react(), jsconfigPaths()]
   };
 });
