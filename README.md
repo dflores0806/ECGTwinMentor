@@ -86,6 +86,14 @@ ECGTwinMentor/
 
 ```
 
+Each subfolder under `deployment/` corresponds to a **self-contained implementation** of the platform, adapted to a specific use case:
+
+- **Cloud**: Enables full access via web, suitable for remote learning and online simulations.
+- **Edge**: Enables offline operation on low-resource devices such as tablets or Raspberry Pi, ensuring accessibility in low-connectivity environments.
+
+> 🧠 **Note:** Users unfamiliar with `npm` or frontend tools may skip the `frontend/` and use the Android or Raspberry Pi versions instead, or follow the detailed setup steps in `deployment/cloud/frontend/README.md`.
+
+
 Each module is self-contained and can be independently tested or deployed depending on the target platform.
 
 ---
@@ -179,7 +187,7 @@ To deploy and run ECGTwinMentor in a cloud environment, the following components
 Clone the repository and navigate to the `cloud` directory:
 
 ```
-git clone https://github.com/your-repo/ECGTwinMentor.git
+git clone https://github.com/dflores0806/ECGTwinMentor.git
 cd ECGTwinMentor/cloud
 ```
 
