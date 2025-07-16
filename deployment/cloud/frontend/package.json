@@ -36,7 +36,7 @@
   "scripts": {
     "prepare-env": "node createEnv.js",
     "start": "npm run prepare-env && vite",
-    "build": "npm run prepare-env && vite build",
+    "build": "vite build --mode production",
     "preview": "vite preview",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint:fix": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
