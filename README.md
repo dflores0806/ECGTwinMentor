@@ -296,7 +296,7 @@ This will:
 Once running, open:
 
 ```
-http://localhost:3000/demo
+http://localhost:3000/demo/
 ```
 
 You can now log in and explore the app.
