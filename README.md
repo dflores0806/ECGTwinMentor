@@ -289,7 +289,7 @@ docker compose up --build
 This will:
 
 - Build and start the backend (FastAPI)
-- Serve the frontend via NGINX at [http://localhost:3000/demo](http://localhost:3000/demo)
+- Serve the frontend via NGINX at [http://localhost:3000/demo/](http://localhost:3000/demo/)
 
 ##### 5. 🧪 Access the app
 
