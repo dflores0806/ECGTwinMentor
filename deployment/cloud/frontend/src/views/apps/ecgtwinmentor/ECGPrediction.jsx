@@ -14,7 +14,8 @@ import {
   Typography,
   CircularProgress,
   Stack,
-  Box
+  Box,
+  Slider
 } from '@mui/material';
 
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -43,6 +44,15 @@ function encryptData(data) {
 const rhythms = ['Sinus', 'Bradycardia', 'Tachycardia', 'Atrial Fibrillation'];
 const tWaves = ['Normal', 'Inverted', 'Peaked', 'Flattened'];
 const diagnoses = ['Normal', 'Bradycardia', 'Tachycardia', 'Atrial Fibrillation', 'Myocardial Infarction', 'Heart Block'];
+
+const sliderRanges = {
+  Heart_Rate: { min: 30, max: 180 },
+  PR_Interval: { min: 80, max: 300 },
+  QRS_Duration: { min: 60, max: 200 },
+  ST_Segment: { min: -0.5, max: 1.5 },
+  QTc_Interval: { min: 300, max: 550 },
+  Electrical_Axis: { min: -180, max: 180 },
+};
 
 const ECGPrediction = () => {
   const [inputs, setInputs] = useState({
@@ -221,10 +231,35 @@ const ECGPrediction = () => {
               </Grid>
             ) : (
               <Grid item xs={12} sm={6} md={3} key={key}>
-                <TextField fullWidth name={key} label={key.replace(/_/g, ' ')} value={value} onChange={handleChange} />
+                <TextField
+                  fullWidth
+                  name={key}
+                  label={key.replace(/_/g, ' ')}
+                  value={value}
+                  onChange={handleChange}
+                  type="number"
+                />
+                <Box display="flex" alignItems="center" mt={1}>
+                  <Typography variant="body2" sx={{ mr: 2, width: 30 }}>
+                    {sliderRanges[key].min}
+                  </Typography>
+                  <Slider
+                    value={Number(value)}
+                    onChange={(e, newValue) => handleChange({ target: { name: key, value: newValue } })}
+                    aria-labelledby={`${key}-slider`}
+                    min={sliderRanges[key].min}
+                    max={sliderRanges[key].max}
+                    sx={{ flex: 1 }}
+                  />
+                  <Typography variant="body2" sx={{ ml: 2, width: 30 }}>
+                    {sliderRanges[key].max}
+                  </Typography>
+                </Box>
               </Grid>
+
             )
           )}
+
         </Grid>
 
         <Stack direction="row" spacing={4} sx={{ mt: 2 }} useFlexGap flexWrap="wrap">
@@ -305,8 +340,12 @@ const ECGPrediction = () => {
             </div>
           </>
         )}
-        <br/>
+        
+        <br />
         {showSimulatedECG && <ECGGraph params={inputs} style={{ marginTop: '50px' }} />}
+
+        Note: The ECG graph displays time on the X-axis (in seconds) and amplitude on the Y-axis (in millivolts, mV), aligned with standard clinical representation. This assumes a signal sampling rate that mimics the conventional ECG paper speed of 25 mm/s.
+
 
         <Typography variant="h6" sx={{ mt: 4, mb: 1 }}>
           3. Select diagnosis
