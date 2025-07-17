@@ -91,9 +91,6 @@ Each subfolder under `deployment/` corresponds to a **self-contained implementat
 - **Cloud**: Enables full access via web, suitable for remote learning and online simulations.
 - **Edge**: Enables offline operation on low-resource devices such as tablets or Raspberry Pi, ensuring accessibility in low-connectivity environments.
 
-> 🧠 **Note:** Users unfamiliar with `npm` or frontend tools may skip the `frontend/` and use the Android or Raspberry Pi versions instead, or follow the detailed setup steps in `deployment/cloud/frontend/README.md`.
-
-
 Each module is self-contained and can be independently tested or deployed depending on the target platform.
 
 ---
@@ -241,6 +238,68 @@ uvicorn main:app --reload
 ```
 
 The backend API will be available at http://localhost:8000. By default, it serves on port `8000` and can be deployed to cloud providers such as AWS EC2, Azure App Service, or Google Cloud Run.
+
+#### 🚀 Deployment with Docker
+
+You can run **ECGTwinMentor** locally using Docker in just a few steps:
+
+##### 1. 📦 Requirements
+
+- Docker installed and running ([Install Docker](https://docs.docker.com/get-docker/))
+- Docker Compose (included in recent Docker Desktop versions)
+
+##### 2. 📁 Project structure
+
+Make sure your folder includes:
+
+```
+deployment/
+│
+├── docker-compose.yml
+├── frontend/
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── dist/           ← built frontend (index.html + assets/)
+│   └── ...
+└── backend/
+    ├── main.py
+    ├── Dockerfile
+    └── ...
+```
+
+##### 3. ⚙️ Build the frontend
+
+From the root of the frontend project (`ECGTwinMentor/deployment/cloud/frontend`):
+
+```bash
+npm install
+npm run build
+```
+
+This creates a `dist/` folder with the production build, ready to be served by NGINX.
+
+##### 4. ▶️ Start the application
+
+From the `cloud/` folder, run:
+
+```bash
+docker compose up --build
+```
+
+This will:
+
+- Build and start the backend (FastAPI)
+- Serve the frontend via NGINX at [http://localhost:3000/demo](http://localhost:3000/demo)
+
+##### 5. 🧪 Access the app
+
+Once running, open:
+
+```
+http://localhost:3000/demo
+```
+
+You can now log in and explore the app.
 
 ### 📱 Edge Computing
 
